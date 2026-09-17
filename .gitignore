@@ -1,0 +1,8 @@
+# Local / editor
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+# Secrets / local configuration backups
+.env
+.env.*

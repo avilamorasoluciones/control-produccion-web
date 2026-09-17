@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ConPro Web - Flamingo</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0d0d0d; --card:#151515; --border:#2a2a2a;
+    --pink:#e91e63; --yellow:#fbc02d; --green:#2e7d32;
+    --red:#c62828; --purple:#6a1b9a; --blue:#1976D2;
+    --ultimo-bg:#AD1457; --ultimo-txt:#FFEB3B;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:#f0f0f0;font-family:Arial,sans-serif;font-size:13px;
+    display:flex;flex-direction:column;height:100vh;overflow:hidden;margin:0;}
+
+  /* NAVBAR */
+  .navbar-top{background:#050505;border-bottom:1px solid #222;padding:4px 10px;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;}
+  .brand{font-size:1rem;font-weight:800;}
+  .brand-year{color:var(--pink);font-weight:800;}
+  #badgeConexion{font-size:0.7rem;padding:2px 7px;border-radius:10px;}
+
+  /* TARJETAS */
+  .grid-maquinas{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding:4px;flex-shrink:0;}
+  .maq-card{background:var(--card);border:1px solid var(--border);border-radius:8px;
+    padding:5px;display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .maq-title{font-size:0.76rem;font-weight:800;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;margin:0;text-align:center;}
+  .btns-estado{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+  .btn-est{font-size:0;font-weight:700;padding:0;border-radius:6px;
+    border-width:2px;border-style:solid;background:transparent;cursor:pointer;
+    transition:all .12s;line-height:1;text-align:center;min-height:25px;}
+  .btn-est.efe{color:#4caf50;border-color:#4caf50;}
+  .btn-est.efe.activo{background:#2e7d32;border-color:#2e7d32;color:#fff;}
+  .btn-est.sin{color:#ffeb3b;border-color:#ffeb3b;}
+  .btn-est.sin.activo{background:#fbc02d;border-color:#fbc02d;color:#000;}
+  .btn-est.fue{color:#f44336;border-color:#f44336;}
+  .btn-est.fue.activo{background:#c62828;border-color:#c62828;color:#fff;}
+  .btn-est.inc{color:#ab47bc;border-color:#ab47bc;}
+  .btn-est.inc.activo{background:#6a1b9a;border-color:#6a1b9a;color:#fff;}
+  .hora-row{display:grid;grid-template-columns:1fr 1fr 38px;gap:3px;align-items:center;margin-top:2px;}
+  .inp-hora{width:100%;font-size:0.95rem;font-weight:700;text-align:center;
+    background:#333;border:2px solid #555;color:#fff;border-radius:6px;
+    height:40px;padding:0 3px;min-width:0;}
+  .inp-hora::placeholder{color:#bdbdbd;opacity:1;}
+  .inp-hora:focus{outline:none;border-color:#1a73e8;background:#1a1a1a;}
+  .btn-add{width:38px;height:40px;background:#1a73e8;border:none;color:#fff;
+    border-radius:6px;font-size:1.35rem;cursor:pointer;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;padding:0;}
+  .btn-add:hover{background:#1557b0;}
+
+  /* BARRA FILTROS */
+  .barra-filtros{display:flex;flex-wrap:wrap;align-items:center;
+    justify-content:space-between;gap:4px;padding:3px 8px;
+    border-bottom:1px solid #222;flex-shrink:0;}
+  .barra-filtros select,.barra-filtros input[type=date]{
+    background:#111;border:1px solid #444;color:#fff;border-radius:5px;
+    font-size:0.75rem;padding:2px 5px;height:26px;}
+  .btn-accion{font-size:0.75rem;font-weight:700;padding:2px 8px;
+    border-radius:5px;border:none;height:26px;cursor:pointer;}
+
+  /* BARRA ACUMULADOS */
+  .barra-acum{background:#181818;border-bottom:1px solid #282828;
+    padding:3px 10px;font-size:0.78rem;font-weight:700;
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px;flex-shrink:0;}
+
+  /* TABLA */
+  .tabla-wrapper{flex:1;overflow-y:auto;position:relative;}
+  table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+  thead th{background:var(--pink)!important;color:#fff;font-weight:700;
+    text-align:center;padding:6px 4px;position:sticky;top:0;z-index:5;border:none;}
+  table th:nth-child(2),table td:nth-child(2){display:none;}
+  tbody td{text-align:center;padding:5px 4px;border-bottom:1px solid #111;font-weight:600;}
+  .r-Efectivo td{background:#2e7d32!important;color:#fff!important;}
+  .r-SinOperar td{background:#fbc02d!important;color:#000!important;}
+  .r-Fuera td{background:#c62828!important;color:#fff!important;}
+  .r-Incidencia td{background:#6a1b9a!important;color:#fff!important;}
+  .r-ultimo td{background:var(--ultimo-bg)!important;color:var(--ultimo-txt)!important;font-weight:800!important;}
+  #tablaReg th:nth-child(2),#tablaReg td:nth-child(2){display:none;}
+  .r-Efectivo .id-cell,.r-Fuera .id-cell,.r-Incidencia .id-cell{color:#fff!important;}
+  .r-SinOperar .id-cell{color:#000!important;}
+  .badge-est{font-size:0.7rem;padding:2px 7px;border-radius:5px;font-weight:700;}
+  .be-Efectivo{background:#2e7d32;color:#fff;}
+  .be-SinOperar{background:#fbc02d;color:#000;}
+  .be-Fuera{background:#c62828;color:#fff;}
+  .be-Incidencia{background:#6a1b9a;color:#fff;}
+
+  /* MENÚ INFERIOR */
+  .menu-inf{background:#050505;border-top:1px solid #222;padding:2px 4px;
+    display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:2px;width:100%;flex-shrink:0;}
+  .btn-nav{font-size:0.7rem;font-weight:700;padding:4px 5px;border-radius:5px;
+    border-width:1px;border-style:solid;background:transparent;cursor:pointer;
+    white-space:nowrap;transition:all .15s;width:100%;}
+  .btn-nav i{color:#fff;margin-right:4px;}
+
+  /* VISTAS PDF */
+  .vista-pdf,.vista-graf{display:none;flex:1;overflow-y:auto;
+    align-items:center;justify-content:center;}
+  .vista-pdf.activo,.vista-graf.activo{display:flex;}
+  .pdf-card{background:var(--card);border:1px solid var(--border);
+    border-radius:10px;padding:24px;max-width:640px;width:100%;text-align:center;}
+  .btn-accion i,.navbar-top i,.btn-primary i{color:#fff;}
+  .pdf-card h4{font-size:1rem;}
+  .pdf-card p{font-size:0.8rem;}
+  select.form-s,input[type=date].form-s{
+    background:#111;border:1px solid #444;color:#fff;border-radius:5px;
+    font-size:0.8rem;padding:4px 8px;height:32px;}
+
+  /* MODAL */
+  .modal-content{background:#1a1a1a;color:#f0f0f0;}
+  .form-control,.form-select{background:#111;border:1px solid #444;color:#fff;font-size:0.82rem;}
+  .form-control:focus,.form-select:focus{background:#1a1a1a;border-color:#1a73e8;color:#fff;box-shadow:none;}
+
+  @media(max-width:1100px){
+    .grid-maquinas{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .menu-inf{grid-template-columns:repeat(5,minmax(0,1fr));}
+  }
+  @media(max-width:650px){
+    /* En móvil la página completa debe poder desplazarse. El escritorio conserva
+       su tabla con scroll interno, pero en pantallas pequeñas dejamos que el
+       contenido crezca para que el usuario pueda bajar hasta la tabla y el menú. */
+    body{font-size:12px;height:auto;min-height:100vh;overflow-x:hidden;overflow-y:auto;}
+    .navbar-top{padding:4px 6px;}
+    .grid-maquinas{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;padding:3px;}
+    .maq-card{padding:5px;}
+    .maq-title{font-size:0.70rem;text-align:center;}
+    .btn-est{font-size:0.64rem;}
+    .inp-hora{height:34px;font-size:0.88rem;}
+    .btn-add{height:34px;width:34px;font-size:1rem;}
+    .barra-filtros{padding:3px 5px;}
+    .barra-filtros>div{width:100%;}
+    .tabla-wrapper{flex:none;min-height:0;overflow:visible;}
+    table{min-width:680px;}
+    .menu-inf{grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;max-height:none;}
+    .pdf-card{margin:8px;padding:16px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar-top">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <img src="assets/flamingo-logo.png" height="22" onerror="this.style.display='none'">
+    <span class="brand">Control de Producción <span class="brand-year" id="lblAnio">2026</span></span>
+    <span id="badgeConexion" style="background:rgba(76,175,80,.15);color:#4caf50;
+      border:1px solid #4caf50;font-size:0.68rem;padding:2px 7px;border-radius:10px;"><i class="fa-solid fa-circle" style="color:#fff;font-size:.52rem;"></i> Conexión</span>
+  </div>
+  <button onclick="document.getElementById('modalRespaldo').style.display='flex'"
+    style="background:#1976D2;border:none;color:#fff;font-size:0.75rem;font-weight:700;
+    padding:4px 10px;border-radius:5px;cursor:pointer;">
+    <i class="fa-solid fa-floppy-disk"></i> Respaldar Datos (SQLite / Excel)
+  </button>
+</div>
+
+<!-- TARJETAS MÁQUINAS -->
+<div class="grid-maquinas" id="gridMaquinas"></div>
+
+<!-- BARRA FILTROS -->
+<div class="barra-filtros">
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+    <span id="lblModo" style="background:#e91e63;color:#fff;font-size:0.73rem;font-weight:700;
+      padding:2px 8px;border-radius:10px;">MODO NORMAL</span>
+    <label style="font-size:0.75rem;color:#aaa;">Máquina:</label>
+    <select id="filtroMaq" style="width:120px;" onchange="cargarTabla()">
+      <option value="Todas">Todas</option>
+      <option>VASOS A</option><option>VASOS B</option>
+      <option>MÁQUINA 9</option><option>MÁQUINA 1</option>
+      <option>MÁQUINA 3</option><option>MÁQUINA 4</option><option>MÁQUINA 5</option>
+    </select>
+    <label style="font-size:0.75rem;color:#aaa;">Fecha:</label>
+    <input type="date" id="filtroFecha" style="width:130px;" onchange="cargarTabla()">
+  </div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;">
+    <button class="btn-accion" style="background:#00BCD4;color:#fff;" onclick="selTodas()"><i class="fa-solid fa-square-check"></i> Seleccionar Todas</button>
+    <button class="btn-accion" style="background:#fbc02d;color:#000;" onclick="abrirEdicion()"><i class="fa-solid fa-pen" style="color:#fff;"></i> Editar</button>
+    <button class="btn-accion" style="background:#c62828;color:#fff;" onclick="eliminar()"><i class="fa-solid fa-trash" style="color:#fff;"></i> Eliminar</button>
+    <button class="btn-accion" id="btnTrasladar" style="background:#9c27b0;color:#fff;" onclick="trasladar()"><i class="fa-solid fa-right-left" style="color:#fff;"></i> Mover a Extras</button>
+  </div>
+</div>
+
+<!-- BARRA ACUMULADOS -->
+<div class="barra-acum">
+  <span style="color:#FFEB3B;"><i class="fa-solid fa-stopwatch" style="color:#fff;"></i> Acumulado del Día:</span>
+  <div id="acums" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+</div>
+
+<!-- TABLA -->
+<div class="tabla-wrapper">
+  <table id="tablaReg">
+    <thead>
+      <tr>
+        <th style="width:30px;"><input type="checkbox" id="chkAll" onchange="chkAllChange(this)"></th>
+        <th style="width:55px;">ID</th>
+        <th>MÁQUINA</th><th>ESTADO</th><th>INICIO</th><th>FIN</th>
+        <th>TOTAL HH:MM</th><th>MINUTOS</th>
+      </tr>
+    </thead>
+    <tbody id="tbodyReg"></tbody>
+  </table>
+</div>
+
+<!-- VISTA PDF -->
+<div class="vista-pdf" id="vistaPDF">
+  <div class="pdf-card">
+    <h4 id="pdfTitulo" style="color:var(--pink);font-weight:800;margin-bottom:6px;">Reporte</h4>
+    <p style="color:#888;margin-bottom:14px;">Selecciona filtros y genera el PDF directamente en tu navegador.</p>
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
+      <div id="grupMes">
+        <label style="font-size:0.78rem;color:#aaa;display:block;margin-bottom:2px;">Mes:</label>
+        <select class="form-s" id="sMes">
+          <option value="01">ENE</option><option value="02">FEB</option><option value="03">MAR</option>
+          <option value="04">ABR</option><option value="05">MAY</option><option value="06">JUN</option>
+          <option value="07">JUL</option><option value="08">AGO</option><option value="09">SEP</option>
+          <option value="10">OCT</option><option value="11">NOV</option><option value="12">DIC</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:0.78rem;color:#aaa;display:block;margin-bottom:2px;">Año:</label>
+        <select class="form-s" id="sAnio">
+          </select>
+      </div>
+    </div>
+    <button id="btnGenPDF" onclick="onGenPDF()"
+      style="background:var(--pink);border:none;color:#fff;font-weight:700;
+      font-size:0.9rem;padding:10px 28px;border-radius:7px;cursor:pointer;">
+      <i class="fa-solid fa-file-pdf"></i> Generar Reporte PDF
+    </button>
+  </div>
+</div>
+
+<!-- VISTA GRÁFICOS -->
+<div class="vista-graf" id="vistaGraf">
+  <div class="pdf-card" style="max-width:750px;">
+    <h4 style="color:#9c27b0;font-weight:800;margin-bottom:6px;"><i class="fa-solid fa-chart-column" style="color:#fff;"></i> Exportador de Gráficos Integrales</h4>
+    <p style="color:#888;margin-bottom:10px;">Genera el PDF con gráficas por mes y por máquina.</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;">
+      <label style="font-size:0.8rem;font-weight:700;">Año:</label>
+      <select class="form-s" id="sGrafAnio" onchange="actualizarChkMeses()">
+      </select>
+    </div>
+    <label style="font-size:0.78rem;color:#aaa;display:block;margin-bottom:6px;">Meses a incluir:</label>
+    <div id="chkMeses" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:left;margin-bottom:16px;"></div>
+    <button id="btnGenGraf" onclick="onGenGraf()"
+      style="background:#9c27b0;border:none;color:#fff;font-weight:700;
+      font-size:0.9rem;padding:10px 28px;border-radius:7px;cursor:pointer;">
+      <i class="fa-solid fa-chart-column"></i> Generar Gráficos PDF
+    </button>
+  </div>
+</div>
+
+<!-- MENÚ INFERIOR -->
+<div class="menu-inf" id="menuInf">
+  <button class="btn-nav" data-vista="Diario"           style="color:#e91e63;border-color:#e91e63;"><i class="fa-solid fa-clipboard-list"></i> Registro Diario</button>
+  <button class="btn-nav" data-vista="DiarioExtra"      style="color:#4CAF50;border-color:#4CAF50;"><i class="fa-solid fa-bolt"></i> Registro Extra</button>
+  <button class="btn-nav" data-vista="Dinamica"         style="color:#1976D2;border-color:#1976D2;"><i class="fa-solid fa-table"></i> T. Dinámica</button>
+  <button class="btn-nav" data-vista="Promedios"        style="color:#00BCD4;border-color:#00BCD4;"><i class="fa-solid fa-chart-line"></i> Prom. Mensual</button>
+  <button class="btn-nav" data-vista="General"          style="color:#ff9800;border-color:#ff9800;"><i class="fa-solid fa-globe"></i> Prom. General</button>
+  <button class="btn-nav" data-vista="Graficos"         style="color:#9c27b0;border-color:#9c27b0;"><i class="fa-solid fa-chart-column"></i> Gráficos</button>
+  <button class="btn-nav" data-vista="ExtraMensual"     style="color:#4CAF50;border-color:#4CAF50;"><i class="fa-solid fa-stopwatch"></i> Extra Mensual</button>
+  <button class="btn-nav" data-vista="PromExtraMensual" style="color:#8BC34A;border-color:#8BC34A;"><i class="fa-solid fa-calendar-days"></i> Prom. Extra Men</button>
+  <button class="btn-nav" data-vista="ExtraTotal"       style="color:#FFEB3B;border-color:#FFEB3B;"><i class="fa-solid fa-hourglass-half"></i> Extra Total</button>
+  <button class="btn-nav" data-vista="PromExtraTotal"   style="color:#FFC107;border-color:#FFC107;"><i class="fa-solid fa-list-check"></i> Prom. Extra Tot</button>
+</div>
+
+<!-- MODAL EDITAR -->
+<div id="modalEditar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
+  z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:20px;width:320px;">
+    <h6 id="modalEditTitulo" style="font-weight:800;margin-bottom:12px;color:#e91e63;">Editar Registro</h6>
+    <input type="hidden" id="editId">
+    <label style="font-size:0.8rem;">Estado:</label>
+    <select class="form-select mb-2 mt-1" id="editEstado" style="font-size:0.82rem;">
+      <option>Efectivo</option><option>Sin operar</option><option>Fuera</option><option>Incidencia</option>
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div>
+        <label style="font-size:0.78rem;">Inicio:</label>
+        <input type="text" class="form-control mt-1" id="editIni" placeholder="HH:MM" style="font-size:0.82rem;">
+      </div>
+      <div>
+        <label style="font-size:0.78rem;">Fin:</label>
+        <input type="text" class="form-control mt-1" id="editFin" placeholder="HH:MM" style="font-size:0.82rem;">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button onclick="document.getElementById('modalEditar').style.display='none'"
+        style="background:#444;border:none;color:#fff;padding:5px 14px;border-radius:5px;cursor:pointer;font-size:0.8rem;">Cancelar</button>
+      <button onclick="guardarEdicion()"
+        style="background:#4caf50;border:none;color:#fff;padding:5px 14px;border-radius:5px;cursor:pointer;font-size:0.8rem;font-weight:700;">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RESPALDO -->
+<div id="modalRespaldo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:24px;width:400px;max-width:95vw;">
+    <h6 style="font-weight:800;margin-bottom:14px;"><i class="fa-solid fa-floppy-disk"></i> Centro de Respaldos</h6>
+    <p style="font-size:0.8rem;color:#888;margin-bottom:16px;">Descarga una copia completa de toda tu base de datos con un solo clic.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <button id="btnDescargarSQLite" onclick="descargarSQLite()"
+        style="background:transparent;border:1px solid #1976D2;color:#90caf9;border-radius:8px;
+        padding:12px;text-align:left;cursor:pointer;font-size:0.82rem;display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-database" style="font-size:1.35rem;color:#fff;"></i>
+        <div><div style="font-weight:700;">Descargar SQLite (.db)</div>
+        <div style="font-size:0.72rem;color:#888;">Archivo .db idéntico al original para tu app de escritorio.</div></div>
+      </button>
+      <button id="btnDescargarExcel" onclick="descargarExcel()"
+        style="background:transparent;border:1px solid #4caf50;color:#a5d6a7;border-radius:8px;
+        padding:12px;text-align:left;cursor:pointer;font-size:0.82rem;display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-file-excel" style="font-size:1.35rem;color:#fff;"></i>
+        <div><div style="font-weight:700;">Descargar Excel (.xlsx)</div>
+        <div style="font-size:0.72rem;color:#888;">Historial completo con todas las columnas ordenado por fecha.</div></div>
+      </button>
+    </div>
+    <div style="background:#0d0d0d;border:1px solid #333;border-radius:6px;padding:10px;font-size:0.74rem;color:#888;margin-bottom:14px;">
+      <i class="fa-solid fa-shield-halved" style="color:#fff;"></i> <span style="color:#FFEB3B;font-weight:700;">Respaldo Seguro:</span> Tus datos están en la nube de Supabase.
+      Guardá estos archivos en tu Google Drive como copia local adicional.
+    </div>
+    <button onclick="document.getElementById('modalRespaldo').style.display='none'"
+      style="background:#333;border:none;color:#fff;padding:5px 14px;border-radius:5px;cursor:pointer;font-size:0.8rem;">Cerrar</button>
+  </div>
+</div>
+
+<!-- canvas oculto para gráficos -->
+<canvas id="hiddenChartCanvas" width="1000" height="450" style="position:absolute;left:-9999px;top:-9999px;"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<script src="backup-engine.js"></script>
+<script src="pdf-engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
