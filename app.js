@@ -73,7 +73,7 @@ function ordenarReg(arr) {
   return [...arr].sort((a,b) => {
     const diff = (ORDEN_MAQ[a.maquina]||99) - (ORDEN_MAQ[b.maquina]||99);
     if (diff !== 0) return diff;
-    return a.hora_inicio < b.hora_inicio ? -1 : 1;
+    return (parseHora(a.hora_inicio) ?? 9999) - (parseHora(b.hora_inicio) ?? 9999);
   });
 }
 
@@ -336,7 +336,7 @@ function renderTabla() {
   // último por máquina
   const ultimoMap = {};
   registrosCache.forEach(r => {
-    if (!ultimoMap[r.maquina] || r.hora_fin >= ultimoMap[r.maquina].hora_fin)
+    if (!ultimoMap[r.maquina] || (parseHora(r.hora_fin) ?? -1) >= (parseHora(ultimoMap[r.maquina].hora_fin) ?? -1))
       ultimoMap[r.maquina] = r;
   });
   const ultimosIds = new Set(Object.values(ultimoMap).map(r=>r.id));
