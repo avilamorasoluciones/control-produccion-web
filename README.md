@@ -57,3 +57,8 @@ El Centro de Respaldos permite descargar:
 - Archivo `LEEME_RESPALDO_*.txt` con instrucciones de recuperación.
 
 El motor de respaldo pagina los registros para evitar descargar solamente las primeras 1.000 filas.
+
+## Instalación como PWA
+
+La aplicación incluye manifest y service worker y detecta cuando el navegador permite instalarla como aplicación. El aviso de instalación se muestra dentro de esta aplicación; no se añade ningún aviso PWA a otros proyectos. En navegadores compatibles de PC y Android se puede pulsar **Instalar** para abrirla como aplicación independiente. En iPhone/iPad se muestran instrucciones para **Compartir → Añadir a pantalla de inicio**.
+
