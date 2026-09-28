@@ -1,0 +1,20 @@
+{
+  "name": "Control de Producción",
+  "short_name": "ConPro",
+  "description": "Control web de la operación y producción.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#e91e63",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
