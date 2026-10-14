@@ -58,11 +58,29 @@ function calcMins(ini, fin) {
   const d = b - a;
   return d > 0 ? d : null;
 }
-function normalizarHoraInput(input) {
+function normalizarHoraInput(input, finalizar = false) {
   let v = input.value.replace(/[^0-9:]/g, '');
-  if (/^\d{3,4}$/.test(v)) v = v.slice(0, -2) + ':' + v.slice(-2);
+
+  // No insertar ":" al tercer dígito: el usuario aún puede estar
+  // escribiendo HHMM y el cursor debe permanecer al final.
+  if (!v.includes(':')) {
+    const digitos = v.replace(/\D/g, '').slice(0, 4);
+    if (digitos.length === 4) {
+      v = digitos.slice(0, 2) + ':' + digitos.slice(2);
+    } else if (finalizar && digitos.length === 3) {
+      v = digitos.slice(0, 1) + ':' + digitos.slice(1);
+    } else {
+      v = digitos;
+    }
+  } else {
+    const partes = v.split(':');
+    const horas = (partes[0] || '').replace(/\D/g, '').slice(0, 2);
+    const minutos = (partes.slice(1).join('') || '').replace(/\D/g, '').slice(0, 2);
+    v = horas + ':' + minutos;
+  }
+
   if (/^\d{1}:\d{2}$/.test(v)) v = '0' + v;
-  input.value = v.slice(0,5);
+  input.value = v.slice(0, 5);
 }
 
 function hoyISO() {
@@ -113,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, true);
   document.querySelectorAll('.inp-hora').forEach(inp => {
     inp.addEventListener('input', () => normalizarHoraInput(inp));
-    inp.addEventListener('blur', () => normalizarHoraInput(inp));
+    inp.addEventListener('blur', () => normalizarHoraInput(inp, true));
   });
   construirChkMeses();
   configurarMenu();
@@ -199,8 +217,8 @@ function construirTarjetas() {
         ).join('')}
       </div>
       <div class="hora-row">
-        <input type="text" inputmode="numeric" autocomplete="off" class="inp-hora" id="ini-${m}" placeholder="Inicio" maxlength="5" aria-label="Hora inicio ${m}">
-        <input type="text" inputmode="numeric" autocomplete="off" class="inp-hora" id="fin-${m}" placeholder="Fin" maxlength="5" aria-label="Hora fin ${m}">
+        <input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" class="inp-hora" id="ini-${m}" placeholder="Inicio" maxlength="5" aria-label="Hora inicio ${m}">
+        <input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" class="inp-hora" id="fin-${m}" placeholder="Fin" maxlength="5" aria-label="Hora fin ${m}">
         <button type="button" class="btn-add" id="add-${m}" title="Agregar registro" aria-label="Agregar registro">
           <i class="fa-solid fa-plus"></i>
         </button>
