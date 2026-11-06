@@ -276,21 +276,33 @@
 <!-- MODAL EDITAR -->
 <div id="modalEditar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
   z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:20px;width:320px;">
+  <div style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:20px;width:380px;max-width:95vw;">
     <h6 id="modalEditTitulo" style="font-weight:800;margin-bottom:12px;color:#e91e63;">Editar Registro</h6>
     <input type="hidden" id="editId">
-    <label style="font-size:0.8rem;">Estado:</label>
-    <select class="form-select mb-2 mt-1" id="editEstado" style="font-size:0.82rem;">
-      <option>Efectivo</option><option>Sin operar</option><option>Fuera</option><option>Incidencia</option>
-    </select>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-      <div>
-        <label style="font-size:0.78rem;">Inicio:</label>
-        <input type="text" class="form-control mt-1" id="editIni" placeholder="HH:MM" style="font-size:0.82rem;">
-      </div>
-      <div>
-        <label style="font-size:0.78rem;">Fin:</label>
-        <input type="text" class="form-control mt-1" id="editFin" placeholder="HH:MM" style="font-size:0.82rem;">
+    <div class="mb-2">
+      <label for="editMaquina" style="font-size:0.8rem;">Máquina:</label>
+      <select class="form-select mt-1" id="editMaquina" style="font-size:0.82rem;">
+        <option value="">Selecciona una máquina...</option>
+        <option>VASOS A</option><option>VASOS B</option>
+        <option>MÁQUINA 9</option><option>MÁQUINA 1</option>
+        <option>MÁQUINA 3</option><option>MÁQUINA 4</option><option>MÁQUINA 5</option>
+      </select>
+    </div>
+    <p id="editAyuda" style="display:none;background:#101010;border:1px solid #333;border-radius:6px;padding:9px;font-size:0.76rem;color:#ccc;margin-bottom:12px;"></p>
+    <div id="grupoCamposEdicion">
+      <label for="editEstado" style="font-size:0.8rem;">Estado:</label>
+      <select class="form-select mb-2 mt-1" id="editEstado" style="font-size:0.82rem;">
+        <option>Efectivo</option><option>Sin operar</option><option>Fuera</option><option>Incidencia</option>
+      </select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div>
+          <label for="editIni" style="font-size:0.78rem;">Inicio:</label>
+          <input type="text" class="form-control mt-1" id="editIni" placeholder="HH:MM" style="font-size:0.82rem;">
+        </div>
+        <div>
+          <label for="editFin" style="font-size:0.78rem;">Fin:</label>
+          <input type="text" class="form-control mt-1" id="editFin" placeholder="HH:MM" style="font-size:0.82rem;">
+        </div>
       </div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
