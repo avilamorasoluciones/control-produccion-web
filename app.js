@@ -27,6 +27,7 @@ const MESES_COMPLETOS_APP = {ENE:"ENERO",FEB:"FEBRERO",MAR:"MARZO",ABR:"ABRIL",M
 let vistaActual = 'Diario';
 let tablaDB = 'registros_diarios';
 let seleccionados = new Set();
+let idsEdicion = [];
 let registrosCache = [];
 let pdfTipo = 'dinamica';
 
@@ -457,28 +458,128 @@ async function trasladar() {
 
 // ── EDITAR ─────────────────────────────────────────────────────────────────
 function abrirEdicion() {
-  if (seleccionados.size!==1) { alert('Selecciona exactamente 1 registro para editar.'); return; }
-  const r = registrosCache.find(r=>r.id===[...seleccionados][0]);
-  if (!r) return;
-  document.getElementById('editId').value  = r.id;
-  document.getElementById('editEstado').value= r.estado;
-  document.getElementById('editIni').value  = r.hora_inicio;
-  document.getElementById('editFin').value  = r.hora_fin;
-  document.getElementById('modalEditTitulo').textContent=`Editando: ${r.maquina}`;
-  document.getElementById('modalEditar').style.display='flex';
+  const ids = [...seleccionados].map(Number).filter(Number.isInteger);
+  if (!ids.length) { alert('Selecciona al menos 1 registro para editar.'); return; }
+
+  idsEdicion = ids;
+  const esMasivo = ids.length > 1;
+  const maquinaSelect = document.getElementById('editMaquina');
+  const grupoCampos = document.getElementById('grupoCamposEdicion');
+  const ayuda = document.getElementById('editAyuda');
+  const titulo = document.getElementById('modalEditTitulo');
+
+  if (!maquinaSelect || !grupoCampos || !ayuda || !titulo) {
+    alert('No se pudo abrir el editor. Recarga la página e inténtalo nuevamente.');
+    return;
+  }
+
+  if (esMasivo) {
+    titulo.textContent = 'Cambiar máquina · ' + ids.length + ' registros';
+    maquinaSelect.value = '';
+    grupoCampos.style.display = 'none';
+    ayuda.textContent = 'Se cambiará únicamente la máquina de los ' + ids.length +
+      ' registros seleccionados. Sus fechas, estados, horas y duraciones se conservarán.';
+    ayuda.style.display = 'block';
+    document.getElementById('editId').value = '';
+  } else {
+    const r = registrosCache.find(reg => Number(reg.id) === ids[0]);
+    if (!r) {
+      alert('No se encontró el registro seleccionado. Actualiza la tabla e inténtalo nuevamente.');
+      idsEdicion = [];
+      return;
+    }
+    titulo.textContent = 'Editar registro: ' + r.maquina;
+    maquinaSelect.value = r.maquina;
+    grupoCampos.style.display = '';
+    ayuda.style.display = 'none';
+    document.getElementById('editId').value = r.id;
+    document.getElementById('editEstado').value = r.estado;
+    document.getElementById('editIni').value = r.hora_inicio;
+    document.getElementById('editFin').value = r.hora_fin;
+  }
+
+  document.getElementById('modalEditar').style.display = 'flex';
 }
+
 async function guardarEdicion() {
-  const id  = parseInt(document.getElementById('editId').value);
+  const ids = [...idsEdicion];
+  if (!ids.length) {
+    alert('No hay registros seleccionados para editar.');
+    return;
+  }
+
+  const maquina = document.getElementById('editMaquina').value;
+  if (!MAQUINAS.includes(maquina)) {
+    alert('Selecciona una máquina válida.');
+    return;
+  }
+
+  if (ids.length > 1) {
+    if (!confirm('¿Cambiar la máquina de ' + ids.length + ' registros a ' + maquina +
+      '? Se conservarán sus estados, horas, duraciones y fechas.')) return;
+
+    const { data, error } = await supabaseClient.from(tablaDB)
+      .update({ maquina }).in('id', ids).select('id');
+
+    if (error) {
+      console.error('Error reasignando máquinas:', error);
+      alert('No se pudieron cambiar las máquinas: ' + error.message);
+      return;
+    }
+
+    const actualizados = Array.isArray(data) ? data.length : 0;
+    if (actualizados !== ids.length) {
+      alert('La base de datos confirmó ' + actualizados + ' de ' + ids.length +
+        ' registros actualizados. Revisa los permisos y vuelve a comprobar la tabla.');
+    } else {
+      alert('Se cambiaron correctamente ' + actualizados + ' registros a ' + maquina + '.');
+    }
+
+    document.getElementById('modalEditar').style.display = 'none';
+    idsEdicion = [];
+    seleccionados.clear();
+    const filtroMaquina = document.getElementById('filtroMaq');
+    if (filtroMaquina.value !== 'Todas' && filtroMaquina.value !== maquina) {
+      filtroMaquina.value = 'Todas';
+    }
+    await cargarTabla();
+    return;
+  }
+
+  const id = ids[0];
   const est = document.getElementById('editEstado').value;
   const ini = document.getElementById('editIni').value.trim();
   const fin = document.getElementById('editFin').value.trim();
-  const dur = calcMins(ini,fin);
-  if (!dur||dur<=0) { alert('La duración no puede ser 0 o negativa.'); return; }
+  const dur = calcMins(ini, fin);
+  if (!dur || dur <= 0) {
+    alert('La duración no puede ser 0 o negativa.');
+    return;
+  }
+
   const { error } = await supabaseClient.from(tablaDB)
-    .update({estado:est,hora_inicio:ini,hora_fin:fin,duracion_minutos:dur}).eq('id',id);
-  if (error) { alert('Error: '+error.message); return; }
-  document.getElementById('modalEditar').style.display='none';
-  seleccionados.clear(); cargarTabla();
+    .update({
+      maquina,
+      estado: est,
+      hora_inicio: ini,
+      hora_fin: fin,
+      duracion_minutos: dur
+    })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error editando registro:', error);
+    alert('Error: ' + error.message);
+    return;
+  }
+
+  document.getElementById('modalEditar').style.display = 'none';
+  idsEdicion = [];
+  seleccionados.clear();
+  const filtroMaquina = document.getElementById('filtroMaq');
+  if (filtroMaquina.value !== 'Todas' && filtroMaquina.value !== maquina) {
+    filtroMaquina.value = 'Todas';
+  }
+  await cargarTabla();
 }
 
 // ── MENÚ ────────────────────────────────────────────────────────────────────
